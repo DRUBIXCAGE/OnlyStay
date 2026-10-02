@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  image          String?
+  bio            String?
+  phone          String?
+  role           String    @default("GUEST") // "GUEST" | "HOST" | "ADMIN"
+  isHostVerified Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  listings       Listing[]
+  bookings       Booking[]
+  reviews        Review[]
+
+  @@map("users")
+}
+
+model Listing {
+  id                 String           @id @default(cuid())
+  hostId             String
+  host               User             @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  propertyType       String           // "Entire home", "Private room", "Boutique stay", "Shared room"
+  roomType           String           @default("entire") // "entire" | "private" | "shared"
+  category           String           @default("Minimalist") // "Minimalist", "Architectural", "Loft", "Seaside", "Desert", "Alpine", "Urban"
+  address            String
+  city               String
+  country            String
+  lat                Float
+  lng                Float
+  pricePerNight      Float
+  weekendSurge       Float            @default(0)
+  cleaningFee        Float            @default(45)
+  serviceFee         Float            @default(25)
+  maxGuests          Int              @default(2)
+  bedrooms           Int              @default(1)
+  beds               Int              @default(1)
+  baths              Float            @default(1.0)
+  isPublished        Boolean          @default(true)
+  instantBookable    Boolean          @default(true)
+  minNights          Int              @default(1)
+  houseRules         String?
+  cancellationPolicy String           @default("FLEXIBLE") // "FLEXIBLE" | "MODERATE" | "STRICT"
+  rating             Float            @default(5.0)
+  reviewCount        Int              @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  images             ListingImage[]
+  amenities          ListingAmenity[]
+  bookings           Booking[]
+  blockedDates       BlockedDate[]
+  reviews            Review[]
+
+  @@index([city])
+  @@index([category])
+  @@index([pricePerNight])
+  @@index([hostId])
+  @@map("listings")
+}
+
+model ListingImage {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url        String
+  caption    String?
+  orderIndex Int      @default(0)
+
+  @@index([listingId])
+  @@map("listing_images")
+}
+
+model ListingAmenity {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  amenityKey String
+
+  @@unique([listingId, amenityKey])
+  @@index([listingId])
+  @@map("listing_amenities")
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  listingId       String
+  listing         Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  guestId         String
+  guest           User     @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  startDate       DateTime
+  endDate         DateTime
+  nights          Int
+  guestsCount     Int      @default(1)
+  pricePerNight   Float
+  cleaningFee     Float    @default(0)
+  serviceFee      Float    @default(0)
+  totalPrice      Float
+  status          String   @default("CONFIRMED") // "PENDING" | "CONFIRMED" | "CHECKED_IN" | "COMPLETED" | "CANCELED"
+  isInstant       Boolean  @default(true)
+  stripePaymentId String?
+  paymentStatus   String   @default("PAID") // "UNPAID" | "PENDING" | "PAID" | "REFUNDED"
+  guestNote       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([listingId])
+  @@index([guestId])
+  @@index([startDate, endDate])
+  @@map("bookings")
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  date      DateTime
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, date])
+  @@index([listingId])
+  @@map("blocked_dates")
+}
+
+model Review {
+  id                  String   @id @default(cuid())
+  listingId           String
+  listing             Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorId            String
+  author              User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating              Float    @default(5.0)
+  cleanlinessRating   Float    @default(5.0)
+  accuracyRating      Float    @default(5.0)
+  communicationRating Float    @default(5.0)
+  locationRating      Float    @default(5.0)
+  checkinRating       Float    @default(5.0)
+  valueRating         Float    @default(5.0)
+  comment             String
+  createdAt           DateTime @default(now())
+
+  @@index([listingId])
+  @@index([authorId])
+  @@map("reviews")
+}
