@@ -59,7 +59,7 @@ export const useUIStore = create<UIState>((set) => ({
     })),
   resetFilters: () => set({ filters: defaultFilters }),
 
-  viewMode: "split",
+  viewMode: "grid",
   setViewMode: (mode) => set({ viewMode: mode }),
 
   hoveredListingId: null,
