@@ -36,7 +36,13 @@
   --radius: 0.875rem;
 }
 
-body {
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: hsl(var(--foreground));
   background: hsl(var(--background));
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";

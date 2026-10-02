@@ -68,7 +68,17 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "Inter", "-apple-system", "sans-serif"],
+        sans: [
+          "var(--font-inter)",
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "'Segoe UI'",
+          "Roboto",
+          "'Helvetica Neue'",
+          "Arial",
+          "sans-serif",
+        ],
         mono: ["var(--font-geist-mono)", "monospace"],
       },
       keyframes: {
